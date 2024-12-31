@@ -24,6 +24,9 @@ OpenAI GPT モデルとの連携により、リアルタイムでの双方向コ
 
 ![スクリーンショット](./flutter-chatgpt.png)
 
+### 動画
+[flutter-chatgpt.webm](https://github.com/user-attachments/assets/f21f61c9-41c2-42cc-8422-e136c1078e3d)
+
 ---
 
 ### 必要要件
@@ -126,6 +129,9 @@ It provides real-time, bidirectional communication by integrating with OpenAI’
 ### Screenshots
 
 ![Screenshot](./flutter-chatgpt.png)
+
+### Video
+[flutter-chatgpt.webm](https://github.com/user-attachments/assets/f21f61c9-41c2-42cc-8422-e136c1078e3d)
 
 ---
 
