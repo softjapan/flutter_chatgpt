@@ -98,7 +98,7 @@ OpenAI GPT モデルとの連携により、リアルタイムでの双方向コ
 
 ### 開発者
 
-- **Twitter**: [FullStack@ITエンジニア](https://twitter.com/softbasejp)
+- **Twitter**: [システムエンジニア@JP](https://twitter.com/fullstack_se)
 
 リポジトリへのリンク: [https://github.com/softjapan/flutter_chatgpt](https://github.com/softjapan/flutter_chatgpt)
 
@@ -204,6 +204,6 @@ This project is released under the [MIT License](./LICENSE). Please see the [LIC
 
 ### Author
 
-- **Twitter**: [FullStack@ITエンジニア](https://twitter.com/softbasejp)
+- **Twitter**: [システムエンジニア@JP](https://twitter.com/fullstack_se)
 
 GitHub Repository: [https://github.com/softjapan/flutter_chatgpt](https://github.com/softjapan/flutter_chatgpt)
