@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/Users/ruihayashi/fvm/versions/3.29.2/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/ruihayashi/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/ruihayashi/MyLab/flutter_chatgpt/android/app/.cxx/Debug/f6j3qg10/x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/ruihayashi/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/ruihayashi/MyLab/flutter_chatgpt/android/app/.cxx/Debug/f6j3qg10/x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
