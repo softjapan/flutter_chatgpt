@@ -19,13 +19,18 @@ class AiMessage extends StatefulWidget {
   ///
   /// @param key ウィジェットのキー
   /// @param text 表示するメッセージテキスト
+  /// @param isStreaming ストリーミング中かどうか
   const AiMessage({
     super.key,
     required this.text,
+    this.isStreaming = false,
   });
 
   /// 表示するメッセージテキスト
   final String text;
+
+  /// ストリーミング中かどうか
+  final bool isStreaming;
 
   @override
   State<AiMessage> createState() => _AiMessageState();
@@ -66,44 +71,17 @@ class _AiMessageState extends State<AiMessage> {
                 ),
               ),
               Expanded(
-                child: renderingState != RenderingState.complete &&
-                        !_hasRendered
-                    ? AnimatedTextKit(
-                        key: textKey,
-                        animatedTexts: [
-                          TypewriterAnimatedText(
-                            widget.text,
-                            textStyle: const TextStyle(
-                              color: FcColors.black,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                        onFinished: () {
-                          // アニメーションが終了したときの処理
-                          setState(() {
-                            _hasRendered = true;
-                            renderingState = RenderingState.complete;
-                            renderSize = (textKey.currentContext != null
-                                ? textKey.currentContext!.size
-                                : const Size(300, 100))!;
-                          });
-                        },
-                        totalRepeatCount: 1,
-                      )
-                    : SizedBox(
-                        width: renderSize.width,
-                        height: renderSize.height,
+                child: widget.isStreaming || _hasRendered
+                    ? Padding(
+                        padding: const EdgeInsets.all(8.0),
                         child: SelectableText.rich(
                           TextSpan(
-                              text: widget.text,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium!
-                                  .copyWith(
-                                    color: FcColors.black,
-                                  )),
+                            text: widget.text,
+                            style: const TextStyle(
+                              color: FcColors.black,
+                              fontSize: 16,
+                            ),
+                          ),
                           onSelectionChanged: (selection, cause) async {
                             // テキストが選択されたときの処理
                             if (cause != null &&
@@ -114,7 +92,28 @@ class _AiMessageState extends State<AiMessage> {
                                   ClipboardData(text: selected));
                             }
                           },
-                        )),
+                        ),
+                      )
+                    : AnimatedTextKit(
+                        key: textKey,
+                        animatedTexts: [
+                          TypewriterAnimatedText(
+                            widget.text,
+                            textStyle: const TextStyle(
+                              color: FcColors.black,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                        onFinished: () {
+                          // アニメーションが終了したときの処理
+                          setState(() {
+                            _hasRendered = true;
+                            renderingState = RenderingState.complete;
+                          });
+                        },
+                        totalRepeatCount: 1,
+                      ),
               ),
             ],
           ),
