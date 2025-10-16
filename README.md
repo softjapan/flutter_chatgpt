@@ -14,6 +14,15 @@ LangChain + LangChain OpenAI を採用し、チャット履歴を LangChain の�
 
 ---
 
+## デモ動画
+
+
+
+https://github.com/user-attachments/assets/3cea0cae-c619-4601-9172-82457ab98959
+
+
+---
+
 ## ハイライト
 
 - **LLM 連携の最新アプローチ**  
@@ -65,6 +74,12 @@ lib/
 
 ---
 
+## スクリーンショット & デモ
+
+![チャット画面](./flutter-chatgpt.png)
+
+---
+
 ## セットアップ
 
 1. **リポジトリを取得**
@@ -101,15 +116,6 @@ lib/
 | LangChain の追加例 | `flutter pub add langchain`    |
 | テスト実行         | `flutter test`                 |
 | L10n/ビルド等      | `flutter build <platform>`     |
-
----
-
-## スクリーンショット & デモ
-
-![チャット画面](./flutter-chatgpt.png)
-
-### デモ動画
-[flutter-chatgpt.webm](https://github.com/user-attachments/assets/f21f61c9-41c2-42cc-8422-e136c1078e3d)
 
 ---
 
