@@ -29,7 +29,6 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  animated_text_kit: ^4.2.2
   cached_network_image: ^3.2.3
   cupertino_icons: ^1.0.5
   dartdoc: ^8.0.8
@@ -47,6 +46,8 @@ dependencies:
   flutter_riverpod: ^2.3.6
   uuid: ^4.5.1
   flutter_dotenv: ^5.0.2
+  langchain: ^0.7.7+2
+  langchain_openai: ^0.7.3
 
 dev_dependencies:
   flutter_lints: ^4.0.0

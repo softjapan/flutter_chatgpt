@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_chatgpt/constants.dart';
 import 'package:flutter_chatgpt/model/chatmodel.dart';
-import 'package:flutter_chatgpt/widgets/user_input.dart';
+import 'package:flutter_chatgpt/model/chat_message.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_chatgpt/widgets/ai_message.dart';
+import 'package:flutter_chatgpt/widgets/loading.dart';
+import 'package:flutter_chatgpt/widgets/user_input.dart';
+import 'package:flutter_chatgpt/widgets/user_message.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -129,7 +133,7 @@ class _MyAppState extends State<MyApp> {
               ),
             ),
             elevation: 0,
-            title: Text(dotenv.env['model'] ?? 'gpt-4o-mini-2024-07-18'),
+            title: Text(_modelName),
             centerTitle: true,
             actions: [
               IconButton(
@@ -173,32 +177,34 @@ class _MyAppState extends State<MyApp> {
           ),
           body: Consumer(builder: (context, ref, child) {
             final chatModel = ref.watch(chatProvider);
-            final messages = chatModel.getMessages;
+            final messages = chatModel.messages;
+
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (!mounted) {
+                return;
+              }
+              if (_scrollController.hasClients) {
+                _scrollController
+                    .jumpTo(_scrollController.position.maxScrollExtent);
+              }
+            });
 
             return Stack(
               children: [
                 //chat
                 Container(
                   margin: const EdgeInsets.only(bottom: 80),
-                  child: LayoutBuilder(
-                    builder: (context, constraints) {
-                      // レイアウト完了後に一番下にスクロール
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (_scrollController.hasClients) {
-                          _scrollController.jumpTo(
-                              _scrollController.position.maxScrollExtent);
-                        }
-                      });
-
-                      return ListView(
-                        controller: _scrollController,
-                        children: [
-                          const Divider(
-                            color: FcColors.gray,
-                          ),
-                          for (int i = 0; i < messages.length; i++) messages[i]
-                        ],
-                      );
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    itemCount: messages.length + 1,
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return const Divider(
+                          color: FcColors.gray,
+                        );
+                      }
+                      final message = messages[index - 1];
+                      return _buildMessageWidget(message);
                     },
                   ),
                 ),
@@ -212,5 +218,37 @@ class _MyAppState extends State<MyApp> {
         ),
       ),
     );
+  }
+
+  Widget _buildMessageWidget(ChatMessage message) {
+    switch (message.sender) {
+      case ChatSender.user:
+        return UserMessage(
+          key: ValueKey(message.id),
+          text: message.text,
+        );
+      case ChatSender.assistant:
+        if (message.isLoading) {
+          return Loading(
+            key: ValueKey(message.id),
+            text: message.text,
+          );
+        }
+        return AiMessage(
+          key: ValueKey(message.id),
+          text: message.text,
+          isStreaming: message.isStreaming,
+        );
+    }
+  }
+
+  String get _modelName {
+    if (dotenv.isInitialized) {
+      final value = dotenv.env['model'];
+      if (value != null && value.isNotEmpty) {
+        return value;
+      }
+    }
+    return 'gpt-4o-mini-2024-07-18';
   }
 }
