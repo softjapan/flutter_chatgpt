@@ -41,47 +41,30 @@ class ChatModel extends ChangeNotifier {
 
     addUserMessage(txt);
 
-    final response = await OpenAiRepository.sendMessage(prompt: txt);
-    if (response['status'] == false) {
-      // エラー処理
-      _messages
-        ..removeLast()
-        ..add(
-          ChatMessage(
-            id: _nextId(),
-            sender: ChatSender.assistant,
-            text: response['message']?.toString() ?? 'エラーが発生しました',
-            status: ChatMessageStatus.complete,
-          ),
-        );
-      notifyListeners();
+    try {
+      final historySnapshot = List<ChatMessage>.from(_messages);
+      var latestContent = '';
 
-      // エラーメッセージ追加後にスクロール
-      if (onMessageAdded != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          onMessageAdded!();
-        });
+      await for (final partial
+          in OpenAiRepository.stream(history: historySnapshot)) {
+        if (partial.isEmpty) {
+          continue;
+        }
+        latestContent = partial;
+        addStreamingUpdate(latestContent);
       }
-    } else {
-      final content = response['choices'][0]['message']['content'] as String;
-      _messages
-        ..removeLast()
-        ..add(
-          ChatMessage(
-            id: _nextId(),
-            sender: ChatSender.assistant,
-            text: content,
-            status: ChatMessageStatus.complete,
-          ),
-        );
-      notifyListeners();
 
-      // AI応答完了後にスクロール
-      if (onMessageAdded != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          onMessageAdded!();
-        });
+      if (latestContent.isEmpty) {
+        final finalHistory = List<ChatMessage>.from(_messages);
+        latestContent = await OpenAiRepository.generate(history: finalHistory);
+        if (latestContent.isNotEmpty) {
+          addStreamingUpdate(latestContent);
+        }
       }
+
+      completeStreaming(latestContent);
+    } catch (e) {
+      _handleAssistantError('An unexpected error occurred: $e');
     }
   }
 
@@ -179,6 +162,54 @@ class ChatModel extends ChangeNotifier {
   String _nextId() {
     _idSeed += 1;
     return _idSeed.toString();
+  }
+
+  void completeStreaming(String content) {
+    if (_messages.isEmpty) {
+      return;
+    }
+
+    final lastIndex = _messages.length - 1;
+    final lastMessage = _messages[lastIndex];
+    if (lastMessage.sender != ChatSender.assistant) {
+      return;
+    }
+
+    _messages[lastIndex] = lastMessage.copyWith(
+      text: content.isEmpty ? lastMessage.text : content,
+      status: ChatMessageStatus.complete,
+    );
+    notifyListeners();
+
+    if (onMessageUpdated != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        onMessageUpdated!();
+      });
+    }
+  }
+
+  void _handleAssistantError(String message) {
+    if (_messages.isNotEmpty &&
+        _messages.last.sender == ChatSender.assistant &&
+        !_messages.last.isComplete) {
+      _messages.removeLast();
+    }
+
+    _messages.add(
+      ChatMessage(
+        id: _nextId(),
+        sender: ChatSender.assistant,
+        text: message,
+        status: ChatMessageStatus.complete,
+      ),
+    );
+    notifyListeners();
+
+    if (onMessageAdded != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        onMessageAdded!();
+      });
+    }
   }
 }
 

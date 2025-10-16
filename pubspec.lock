@@ -161,6 +161,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.2"
+  fetch_api:
+    dependency: transitive
+    description:
+      name: fetch_api
+      sha256: "24cbd5616f3d4008c335c197bb90bfa0eb43b9e55c6de5c60d1f805092636034"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.1"
+  fetch_client:
+    dependency: transitive
+    description:
+      name: fetch_client
+      sha256: "375253f4efe64303c793fb17fe90771c591320b2ae11fb29cb5b406cc8533c00"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.4"
   ffi:
     dependency: transitive
     description:
@@ -336,6 +352,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  freezed_annotation:
+    dependency: transitive
+    description:
+      name: freezed_annotation
+      sha256: c2e2d632dd9b8a2b7751117abcfc2b4888ecfe181bd9fca7170d9ef02e595fe2
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.4"
   glob:
     dependency: transitive
     description:
@@ -448,6 +472,38 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.9.0"
+  langchain:
+    dependency: "direct main"
+    description:
+      name: langchain
+      sha256: "5ed0d1718108f78657f6e83dc7ce383f054a9ad46c7230957d82600ca677deaa"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.7+2"
+  langchain_core:
+    dependency: transitive
+    description:
+      name: langchain_core
+      sha256: "89ae8945acfc21434e6374324a4592e7cfe49a3af28a6d9780f8c9cf5028fe31"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.6+1"
+  langchain_openai:
+    dependency: "direct main"
+    description:
+      name: langchain_openai
+      sha256: b8d1b5797c9ac003d0a6e68149cfe5df8a239c3fc079b81b5dc0c03a2fd37723
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.3"
+  langchain_tiktoken:
+    dependency: transitive
+    description:
+      name: langchain_tiktoken
+      sha256: c1804f4b3e56574ca67e562305d9f11e3eabe3c8aa87fea8635992f7efc66674
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   leak_tracker:
     dependency: transitive
     description:
@@ -544,6 +600,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.0"
+  openai_dart:
+    dependency: transitive
+    description:
+      name: openai_dart
+      sha256: "1cc5ed0915fa7572b943de01cfa7a3e5cfe1e6a7f4d0d9a9374d046518e84575"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.5"
   package_config:
     dependency: transitive
     description:
