@@ -1,209 +1,149 @@
-# 日本語版
+# Flutter ChatGPT Client
 
-## Flutter × Riverpod で構築した ChatGPT クライアント (LINE 風チャット UI)
+**LangChain + Flutter + Riverpod によるリアルタイム ChatGPT クライアント**
 
-Flutter と Riverpod を使用して開発した LINE 風のチャット UI を特徴とする ChatGPT クライアントアプリケーションです。  
-OpenAI GPT モデルとの連携により、リアルタイムでの双方向コミュニケーションを実現します。
-
----
-
-### 特徴
-
-- **LINE 風のチャット UI**  
-  シンプルかつ見やすいデザインを採用し、直感的に操作できるユーザーインターフェース
-- **OpenAI GPT モデルとのリアルタイムチャット**  
-  ChatGPT API を活用し、人間らしい自然な対話を実現
-- **Riverpod による状態管理**  
-  ビジネスロジックと UI を分離することで、拡張性・保守性を向上
-- **レスポンシブデザイン**  
-  スマートフォンから大型端末まで、さまざまな画面サイズに対応したレイアウト
+![Flutter](https://img.shields.io/badge/Flutter-3.19+-02569B?logo=flutter) ![Riverpod](https://img.shields.io/badge/Riverpod-2.x-50C878?logo=dart) ![LangChain](https://img.shields.io/badge/LangChain-Dart-2e7d32) ![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 
 ---
 
-### スクリーンショット
+## 概要
 
-![スクリーンショット](./flutter-chatgpt.png)
-
-### 動画
-[flutter-chatgpt.webm](https://github.com/user-attachments/assets/f21f61c9-41c2-42cc-8422-e136c1078e3d)
-
----
-
-### 必要要件
-
-- **Flutter** 3.19.x 以上
-- **Dart** 3.3.x 以上
-- **OpenAI API キー**
+Flutter と Riverpod をベースにした LINE 風 UI の ChatGPT クライアントです。  
+LangChain + LangChain OpenAI を採用し、チャット履歴を LangChain のチャットモデルへストリーミング連携することで、段階的なトーク更新と Markdown レンダリングを実現します。  
+フロントエンドは純 Flutter で構築し、AI モデルとの通信はリポジトリ層で完全に抽象化。モバイル／デスクトップのクロスプラットフォーム展開を前提としたアーキテクチャです。
 
 ---
 
-### セットアップ手順
+## ハイライト
 
-1. **リポジトリのクローン**
+- **LLM 連携の最新アプローチ**  
+  LangChain のチャットモデル (`ChatOpenAI`) とストリーミング API を利用し、トーク生成の途中経過を自然に反映。
+- **堅牢な状態管理**  
+  Riverpod (`ChangeNotifierProvider`) により、UI/状態/ドメインロジックを明確に分離。ユニットテスト容易性も確保。
+- **Markdown レンダリングによるリッチな表示**  
+  `flutter_markdown` で数式・コードブロック・リストなどをネイティブ描画。選択・コピーにも対応。
+- **UI/UX に配慮したチャット体験**  
+  ユーザー・AI 双方のバブル表現、Thinking インジケーター、ストリーミング時のプログレス表示を備えた LINE ライクな UI。
+- **実務レベルの設定管理**  
+  `.env` で API キーやモデル、エンドポイントを切り替え可能。OpenAI 互換のプロキシやカスタムエンドポイントにも対応。
+
+---
+
+## アーキテクチャ概要
+
+```
+lib/
+├── main.dart                     # エントリポイント + UI ルート
+├── model/
+│   ├── chat_message.dart         # 不変メッセージモデル (データ層)
+│   └── chatmodel.dart            # ChangeNotifier (状態管理)
+├── repository/
+│   └── openai_repository.dart    # LangChain を使った LLM アクセス
+└── widgets/                      # プレゼンテーション層
+    ├── ai_message.dart
+    ├── loading.dart
+    ├── user_input.dart
+    └── user_message.dart
+```
+
+- **Presentation**: Flutter Widgets (Material Design) + Markdown 表示  
+- **State Management**: Riverpod ChangeNotifier を利用したメッセージストア  
+- **Domain / Data**: LangChain による LLM 呼び出し、OpenAI 互換エンドポイント対応  
+- **Testing**: `flutter_test` によるスモークテストを用意し、ProviderScope での依存解決を検証
+
+---
+
+## 技術スタック
+
+| Layer            | Technology & Packages                                                                 |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| UI/Presentation  | Flutter, Material Design, `flutter_markdown`, `flutter_svg`                            |
+| State Management | Riverpod (`flutter_riverpod`)                                                          |
+| LLM Integration  | LangChain (`langchain`), LangChain OpenAI (`langchain_openai`), `langchain_tiktoken`   |
+| Config/Env       | `flutter_dotenv`                                                                       |
+| Tooling          | Dart 3.3+, Flutter 3.19+, Very Good Analysis, Flutter Test                             |
+
+---
+
+## セットアップ
+
+1. **リポジトリを取得**
    ```bash
    git clone https://github.com/softjapan/flutter_chatgpt.git
+   cd flutter_chatgpt
    ```
-2. **依存関係のインストール**
+
+2. **依存関係の取得**
    ```bash
    flutter pub get
    ```
+
 3. **環境変数の設定**  
-   プロジェクトのルートディレクトリに `.env` ファイルを作成し、以下の内容を設定してください:
+   ルート直下に `.env` を作成し、以下を設定してください。
+   ```env
+   endpoint=https://api.openai.com/v1
+   model=gpt-4o-mini-2024-07-18
+   aiToken=your-openai-api-key
    ```
-   endpoint='https://api.openai.com/v1/'
-   model='gpt-4-turbo-preview'
-   aiToken='your-api-key-here'
-   ```
-4. **アプリケーションの実行**
+
+4. **アプリの起動**
    ```bash
    flutter run
    ```
 
 ---
 
-### 使用している主な技術
+## コマンドチートシート
 
-- [Flutter](https://flutter.dev/)
-- [Riverpod](https://riverpod.dev/)
-- [OpenAI API](https://platform.openai.com/)
-- [Freezed](https://pub.dev/packages/freezed)
-- [flutter_dotenv](https://pub.dev/packages/flutter_dotenv)
-
----
-
-### ライセンス
-
-このプロジェクトは [MIT License](./LICENSE) の下で公開されています。詳細は [LICENSE](./LICENSE) ファイルをご覧ください。
+| Purpose            | Command                        |
+| ------------------ | ------------------------------ |
+| 依存関係の更新     | `flutter pub get`              |
+| LangChain の追加例 | `flutter pub add langchain`    |
+| テスト実行         | `flutter test`                 |
+| L10n/ビルド等      | `flutter build <platform>`     |
 
 ---
 
-### コントリビューションの方法
+## スクリーンショット & デモ
 
-1. 本リポジトリを **Fork** する
-2. フィーチャーブランチを作成する
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. 変更をコミットする
-   ```bash
-   git commit -m 'Add some amazing feature'
-   ```
-4. ブランチをリモートリポジトリにプッシュする
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-5. **Pull Request** を作成する
+![チャット画面](./flutter-chatgpt.png)
 
----
-
-### 開発者
-
-- **Twitter**: [システムエンジニア@JP](https://twitter.com/fullstack_se)
-
-リポジトリへのリンク: [https://github.com/softjapan/flutter_chatgpt](https://github.com/softjapan/flutter_chatgpt)
-
----
-
-# English Version
-
-## ChatGPT Client with LINE-Style UI Built with Flutter and Riverpod
-
-This is a ChatGPT client application developed with Flutter and Riverpod, featuring a LINE-inspired chat UI.  
-It provides real-time, bidirectional communication by integrating with OpenAI’s GPT models.
-
----
-
-### Features
-
-- **LINE-Style Chat UI**  
-  A simple, intuitive design that offers a streamlined user experience
-- **Real-Time Chat with OpenAI GPT Model**  
-  Utilizes the ChatGPT API to enable natural, human-like conversations
-- **State Management with Riverpod**  
-  Improves scalability and maintainability by separating application logic from the UI
-- **Responsive Design**  
-  Adapts seamlessly to various screen sizes, from smartphones to larger devices
-
----
-
-### Screenshots
-
-![Screenshot](./flutter-chatgpt.png)
-
-### Video
+### デモ動画
 [flutter-chatgpt.webm](https://github.com/user-attachments/assets/f21f61c9-41c2-42cc-8422-e136c1078e3d)
 
 ---
 
-### Requirements
+## コントリビューション
 
-- **Flutter** 3.19.x or higher
-- **Dart** 3.3.x or higher
-- **OpenAI API Key**
-
----
-
-### Setup
-
-1. **Clone the repository**
+1. リポジトリを **Fork**
+2. ブランチを作成  
    ```bash
-   git clone https://github.com/softjapan/flutter_chatgpt.git
+   git checkout -b feature/awesome-feature
    ```
-2. **Install dependencies**
+3. 変更をコミット  
    ```bash
-   flutter pub get
+   git commit -m "Add awesome feature"
    ```
-3. **Configure environment variables**  
-   Create a `.env` file in the project’s root directory and add the following:
-   ```
-   endpoint='https://api.openai.com/v1/'
-   model='gpt-4-turbo-preview'
-   aiToken='your-api-key-here'
-   ```
-4. **Run the application**
+4. Push & Pull Request  
    ```bash
-   flutter run
+   git push origin feature/awesome-feature
    ```
 
 ---
 
-### Technologies Used
+## ライセンス
 
-- [Flutter](https://flutter.dev/)
-- [Riverpod](https://riverpod.dev/)
-- [OpenAI API](https://platform.openai.com/)
-- [Freezed](https://pub.dev/packages/freezed)
-- [flutter_dotenv](https://pub.dev/packages/flutter_dotenv)
+このプロジェクトは [MIT License](./LICENSE) の下で公開されています。
 
 ---
 
-### License
+## Author
 
-This project is released under the [MIT License](./LICENSE). Please see the [LICENSE](./LICENSE) file for details.
-
----
-
-### How to Contribute
-
-1. **Fork** this repository
-2. Create a new feature branch
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. Commit your changes
-   ```bash
-   git commit -m 'Add some amazing feature'
-   ```
-4. Push the branch to the remote repository
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-5. Create a **Pull Request**
+- **Twitter**: [システムエンジニア@JP](https://twitter.com/fullstack_se)  
+- **GitHub**: [softjapan/flutter_chatgpt](https://github.com/softjapan/flutter_chatgpt)
 
 ---
 
-### Author
+### English Summary
 
-- **Twitter**: [システムエンジニア@JP](https://twitter.com/fullstack_se)
-
-GitHub Repository: [https://github.com/softjapan/flutter_chatgpt](https://github.com/softjapan/flutter_chatgpt)
+A Flutter + Riverpod ChatGPT client leveraging LangChain’s `ChatOpenAI` for streaming responses, delivering a LINE-style chat experience with Markdown rendering, responsive UI, and environment-driven configuration. Cross-platform ready, production-oriented architecture with clear separation of concerns and automated testing.
