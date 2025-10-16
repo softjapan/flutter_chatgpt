@@ -29,7 +29,6 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
-  animated_text_kit: ^4.2.2
   cached_network_image: ^3.2.3
   cupertino_icons: ^1.0.5
   dartdoc: ^8.0.8

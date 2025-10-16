@@ -1,20 +1,10 @@
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_chatgpt/constants.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-/// レンダリングの状態を表す列挙型
-enum RenderingState {
-  /// レンダリングされていない状態
-  none,
-
-  /// レンダリングが完了した状態
-  complete
-}
-
 /// AIのメッセージを表示するウィジェットクラス
-class AiMessage extends StatefulWidget {
+class AiMessage extends StatelessWidget {
   /// コンストラクタ
   ///
   /// @param key ウィジェットのキー
@@ -31,16 +21,6 @@ class AiMessage extends StatefulWidget {
 
   /// ストリーミング中かどうか
   final bool isStreaming;
-
-  @override
-  State<AiMessage> createState() => _AiMessageState();
-}
-
-class _AiMessageState extends State<AiMessage> {
-  RenderingState renderingState = RenderingState.none; // レンダリングの状態
-  Size renderSize = Size.zero; // レンダリングされたテキストのサイズ
-  GlobalKey textKey = GlobalKey(); // テキストのグローバルキー
-  bool _hasRendered = false; // レンダリングが完了したかどうかのフラグ
 
   @override
   Widget build(BuildContext context) {
@@ -71,49 +51,31 @@ class _AiMessageState extends State<AiMessage> {
                 ),
               ),
               Expanded(
-                child: widget.isStreaming || _hasRendered
-                    ? Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SelectableText.rich(
-                          TextSpan(
-                            text: widget.text,
-                            style: const TextStyle(
-                              color: FcColors.black,
-                              fontSize: 16,
-                            ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      MarkdownBody(
+                        data: text,
+                        selectable: true,
+                        styleSheet: MarkdownStyleSheet.fromTheme(
+                          Theme.of(context).copyWith(
+                            textTheme: Theme.of(context).textTheme.apply(
+                                  bodyColor: FcColors.black,
+                                  displayColor: FcColors.black,
+                                ),
                           ),
-                          onSelectionChanged: (selection, cause) async {
-                            // テキストが選択されたときの処理
-                            if (cause != null &&
-                                cause == SelectionChangedCause.longPress) {
-                              final selected = widget.text
-                                  .substring(selection.start, selection.end);
-                              await Clipboard.setData(
-                                  ClipboardData(text: selected));
-                            }
-                          },
                         ),
-                      )
-                    : AnimatedTextKit(
-                        key: textKey,
-                        animatedTexts: [
-                          TypewriterAnimatedText(
-                            widget.text,
-                            textStyle: const TextStyle(
-                              color: FcColors.black,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ],
-                        onFinished: () {
-                          // アニメーションが終了したときの処理
-                          setState(() {
-                            _hasRendered = true;
-                            renderingState = RenderingState.complete;
-                          });
-                        },
-                        totalRepeatCount: 1,
                       ),
+                      if (isStreaming) ...[
+                        const SizedBox(height: 8),
+                        const LinearProgressIndicator(minHeight: 2),
+                      ],
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
