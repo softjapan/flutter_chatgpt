@@ -7,6 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:flutter_chatgpt/main.dart';
 import 'package:flutter_chatgpt/widgets/user_input.dart';
@@ -16,7 +17,11 @@ import 'package:flutter_chatgpt/widgets/loading.dart';
 void main() {
   testWidgets('ChatGPT App smoke test', (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: MyApp(),
+      ),
+    );
 
     // Verify that the app title is displayed
     expect(find.text('gpt-4o-mini-2024-07-18'), findsOneWidget);

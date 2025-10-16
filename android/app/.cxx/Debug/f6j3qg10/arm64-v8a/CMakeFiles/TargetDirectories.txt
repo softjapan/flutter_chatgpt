@@ -1,2 +1,0 @@
-/Users/ruihayashi/MyLab/flutter_chatgpt/android/app/.cxx/Debug/f6j3qg10/arm64-v8a/CMakeFiles/edit_cache.dir
-/Users/ruihayashi/MyLab/flutter_chatgpt/android/app/.cxx/Debug/f6j3qg10/arm64-v8a/CMakeFiles/rebuild_cache.dir
