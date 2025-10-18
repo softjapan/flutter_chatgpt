@@ -30,6 +30,8 @@ class ChatMessage {
     required this.sender,
     required this.text,
     required this.status,
+    this.imageUrl,
+    this.altText,
   });
 
   /// メッセージを一意に識別する ID
@@ -40,6 +42,12 @@ class ChatMessage {
 
   /// メッセージ本文
   final String text;
+
+  /// 画像URL（画像生成結果用）
+  final String? imageUrl;
+
+  /// 画像の説明や代替テキスト
+  final String? altText;
 
   /// メッセージの状態
   final ChatMessageStatus status;
@@ -53,17 +61,24 @@ class ChatMessage {
   /// 完了済みかどうか
   bool get isComplete => status == ChatMessageStatus.complete;
 
+  /// 画像メッセージかどうか
+  bool get hasImage => imageUrl != null && imageUrl!.isNotEmpty;
+
   /// メッセージのコピーを作成
   ChatMessage copyWith({
     String? id,
     ChatSender? sender,
     String? text,
     ChatMessageStatus? status,
+    String? imageUrl,
+    String? altText,
   }) {
     return ChatMessage(
       id: id ?? this.id,
       sender: sender ?? this.sender,
       text: text ?? this.text,
+      imageUrl: imageUrl ?? this.imageUrl,
+      altText: altText ?? this.altText,
       status: status ?? this.status,
     );
   }

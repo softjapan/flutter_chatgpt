@@ -237,6 +237,8 @@ class _MyAppState extends State<MyApp> {
         return AiMessage(
           key: ValueKey(message.id),
           text: message.text,
+          imageUrl: message.imageUrl,
+          altText: message.altText,
           isStreaming: message.isStreaming,
         );
     }

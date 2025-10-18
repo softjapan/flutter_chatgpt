@@ -34,14 +34,28 @@ class ChatModel extends ChangeNotifier {
   }
 
   /// Sends chat request to OpenAI chat server.
-  Future<void> sendChat(String txt) async {
-    if (txt.trim().isEmpty) {
+  Future<void> sendChat(String rawInput) async {
+    final request = _ChatRequest.parse(rawInput);
+    if (request == null) {
       return;
     }
 
-    addUserMessage(txt);
+    final placeholder = request.type == _ChatTaskType.image
+        ? 'rendering image...'
+        : 'thinking...';
+    addUserMessage(request.displayText, placeholder: placeholder);
 
     try {
+      if (request.type == _ChatTaskType.image) {
+        final imageUrl =
+            await OpenAiRepository.generateImage(prompt: request.prompt);
+        _completeWithImage(
+          imageUrl: imageUrl,
+          description: request.prompt,
+        );
+        return;
+      }
+
       final historySnapshot = List<ChatMessage>.from(_messages);
       var latestContent = '';
 
@@ -64,13 +78,21 @@ class ChatModel extends ChangeNotifier {
 
       completeStreaming(latestContent);
     } catch (e) {
-      _handleAssistantError('An unexpected error occurred: $e');
+      _handleAssistantError(
+        request.type == _ChatTaskType.image
+            ? 'Failed to generate image: $e'
+            : 'An unexpected error occurred: $e',
+      );
     }
   }
 
   /// Adds a new message to the list.
-  void addUserMessage(String txt) {
-    if (txt.trim().isEmpty) {
+  void addUserMessage(
+    String txt, {
+    String placeholder = 'thinking...',
+  }) {
+    final sanitized = txt.trim();
+    if (sanitized.isEmpty) {
       return;
     }
 
@@ -79,7 +101,7 @@ class ChatModel extends ChangeNotifier {
         ChatMessage(
           id: _nextId(),
           sender: ChatSender.user,
-          text: txt,
+          text: sanitized,
           status: ChatMessageStatus.complete,
         ),
       )
@@ -87,7 +109,7 @@ class ChatModel extends ChangeNotifier {
         ChatMessage(
           id: _nextId(),
           sender: ChatSender.assistant,
-          text: 'thinking...',
+          text: placeholder,
           status: ChatMessageStatus.loading,
         ),
       );
@@ -110,7 +132,7 @@ class ChatModel extends ChangeNotifier {
     final lastIndex = _messages.length - 1;
     final lastMessage = _messages[lastIndex];
 
-    if (lastMessage.sender != ChatSender.assistant) {
+    if (lastMessage.sender != ChatSender.assistant || lastMessage.hasImage) {
       return;
     }
 
@@ -175,6 +197,10 @@ class ChatModel extends ChangeNotifier {
       return;
     }
 
+    if (lastMessage.hasImage) {
+      return;
+    }
+
     _messages[lastIndex] = lastMessage.copyWith(
       text: content.isEmpty ? lastMessage.text : content,
       status: ChatMessageStatus.complete,
@@ -211,6 +237,78 @@ class ChatModel extends ChangeNotifier {
       });
     }
   }
+
+  void _completeWithImage({
+    required String imageUrl,
+    required String description,
+  }) {
+    if (_messages.isEmpty) {
+      return;
+    }
+
+    final lastIndex = _messages.length - 1;
+    final lastMessage = _messages[lastIndex];
+    if (lastMessage.sender != ChatSender.assistant) {
+      return;
+    }
+
+    _messages[lastIndex] = lastMessage.copyWith(
+      text: description.isEmpty ? 'Generated image.' : 'Generated image:',
+      altText: description.isNotEmpty ? description : null,
+      imageUrl: imageUrl,
+      status: ChatMessageStatus.complete,
+    );
+    notifyListeners();
+
+    if (onMessageUpdated != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        onMessageUpdated!();
+      });
+    }
+  }
 }
 
 final chatProvider = ChangeNotifierProvider((ref) => ChatModel());
+
+enum _ChatTaskType { text, image }
+
+class _ChatRequest {
+  const _ChatRequest({
+    required this.type,
+    required this.displayText,
+    required this.prompt,
+  });
+
+  final _ChatTaskType type;
+  final String displayText;
+  final String prompt;
+
+  static _ChatRequest? parse(String input) {
+    final trimmed = input.trim();
+    if (trimmed.isEmpty) {
+      return null;
+    }
+
+    final lower = trimmed.toLowerCase();
+    const prefixes = ['/image', '/img', 'image:', 'img:'];
+    for (final prefix in prefixes) {
+      if (lower.startsWith(prefix)) {
+        final prompt = trimmed.substring(prefix.length).trim();
+        if (prompt.isEmpty) {
+          break;
+        }
+        return _ChatRequest(
+          type: _ChatTaskType.image,
+          displayText: trimmed,
+          prompt: prompt,
+        );
+      }
+    }
+
+    return _ChatRequest(
+      type: _ChatTaskType.text,
+      displayText: trimmed,
+      prompt: trimmed,
+    );
+  }
+}

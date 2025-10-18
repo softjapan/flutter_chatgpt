@@ -8,9 +8,9 @@
 
 ## 概要
 
-Flutter と Riverpod をベースにした LINE 風 UI の ChatGPT クライアントです。  
-LangChain + LangChain OpenAI を採用し、チャット履歴を LangChain のチャットモデルへストリーミング連携することで、段階的なトーク更新と Markdown レンダリングを実現します。  
-フロントエンドは純 Flutter で構築し、AI モデルとの通信はリポジトリ層で完全に抽象化。モバイル／デスクトップのクロスプラットフォーム展開を前提としたアーキテクチャです。
+Flutter × Riverpod × LangChain で構築した、LINE 風 UI のモダンな ChatGPT クライアントです。  
+チャットは LangChain 経由で OpenAI のストリーミング API と連携し、AI 応答をリアルタイムで描画。Markdown レンダリングやアニメーション付きローディング、ハイブリッドなテキスト＆画像生成（`/image` コマンド）、フルスクリーン画像ビューア／ダウンロードなど、実務投入を想定した機能を備えています。  
+UI は純 Flutter なので、モバイル／デスクトップ／Web へシームレスに展開できます。
 
 ---
 
@@ -25,16 +25,18 @@ https://github.com/user-attachments/assets/3cea0cae-c619-4601-9172-82457ab98959
 
 ## ハイライト
 
-- **LLM 連携の最新アプローチ**  
-  LangChain のチャットモデル (`ChatOpenAI`) とストリーミング API を利用し、トーク生成の途中経過を自然に反映。
-- **堅牢な状態管理**  
-  Riverpod (`ChangeNotifierProvider`) により、UI/状態/ドメインロジックを明確に分離。ユニットテスト容易性も確保。
-- **Markdown レンダリングによるリッチな表示**  
-  `flutter_markdown` で数式・コードブロック・リストなどをネイティブ描画。選択・コピーにも対応。
-- **UI/UX に配慮したチャット体験**  
-  ユーザー・AI 双方のバブル表現、Thinking インジケーター、ストリーミング時のプログレス表示を備えた LINE ライクな UI。
-- **実務レベルの設定管理**  
-  `.env` で API キーやモデル、エンドポイントを切り替え可能。OpenAI 互換のプロキシやカスタムエンドポイントにも対応。
+- **リアルタイム・ストリーミング応答**  
+  LangChain の `ChatOpenAI` でチャット履歴をストリーム処理。部分的なデルタが届くたびにバブルが更新され、Markdown と連動して自然なレンダリングを実現。
+- **テキスト & 画像生成の両対応**  
+  `.env` の `model` / `imageModel` を切り替えることで最新 GPT モデルへ柔軟に接続。`/image <prompt>` コマンドで画像生成 API を呼び出し、トーク内にサムネイルを埋め込み。
+- **リッチな画像体験**  
+  画像バブルをタップするとフルスクリーンプレビュー（ピンチズーム対応）が開き、その場でローカルへダウンロード可能。Base64/URL いずれのペイロードも自動判別。
+- **洗練された UI/UX**  
+  LINE 風のチャットバブル、アニメーションする「thinking...」インジケーター、Markdown を多用したドキュメント風レスポンス、SelectableText によるコピー体験を提供。
+- **堅牢なアーキテクチャ**  
+  Riverpod + ChangeNotifier で状態を管理し、LLM との通信は Repository 層へ集約。モジュールごとにテスト容易性と変更耐性を確保。
+- **柔軟な環境設定**  
+  `.env` で API キーやエンドポイントを完全に切り替え可能。OpenAI 互換プロキシや社内ゲートウェイを通した接続にも対応。
 
 ---
 
@@ -66,9 +68,11 @@ lib/
 
 | Layer            | Technology & Packages                                                                 |
 | ---------------- | -------------------------------------------------------------------------------------- |
-| UI/Presentation  | Flutter, Material Design, `flutter_markdown`, `flutter_svg`                            |
+| UI/Presentation  | Flutter, Material Design, `flutter_markdown`, `flutter_svg`, `cached_network_image`    |
 | State Management | Riverpod (`flutter_riverpod`)                                                          |
 | LLM Integration  | LangChain (`langchain`), LangChain OpenAI (`langchain_openai`), `langchain_tiktoken`   |
+| Networking       | `http`, OpenAI REST endpoints                                                          |
+| Storage/IO       | `path_provider` (画像保存)                                                             |
 | Config/Env       | `flutter_dotenv`                                                                       |
 | Tooling          | Dart 3.3+, Flutter 3.19+, Very Good Analysis, Flutter Test                             |
 
@@ -98,6 +102,7 @@ lib/
    ```env
    endpoint=https://api.openai.com/v1
    model=gpt-4o-mini-2024-07-18
+   imageModel=gpt-image-1
    aiToken=your-openai-api-key
    ```
 
@@ -116,6 +121,15 @@ lib/
 | LangChain の追加例 | `flutter pub add langchain`    |
 | テスト実行         | `flutter test`                 |
 | L10n/ビルド等      | `flutter build <platform>`     |
+
+---
+
+## 使い方のヒント
+
+- 通常のメッセージはそのまま送信すれば GPT の応答が Markdown として表示されます。
+- 画像を生成したい場合は `/image 空に浮かぶ近未来都市` のように `/image` もしくは `/img` プレフィックスを付けて送信してください。
+- 生成された画像はタップで全画面表示 → 拡大縮小 → ダウンロードが可能です（モバイル／デスクトップアプリで動作）。
+- `.env` の `endpoint` を差し替えれば OpenAI 互換 API（プロキシ、Azure OpenAI 等）にも接続できます。
 
 ---
 
