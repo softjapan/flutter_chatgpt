@@ -17,8 +17,7 @@ UI は純 Flutter なので、モバイル／デスクトップ／Web へシー�
 ## デモ動画
 
 
-
-https://github.com/user-attachments/assets/3cea0cae-c619-4601-9172-82457ab98959
+https://github.com/user-attachments/assets/fc89e894-818c-42a9-a589-b94df6c14388
 
 
 ---
